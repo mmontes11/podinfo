@@ -2,13 +2,14 @@
 #
 # The release version is controlled from pkg/version
 
-TAG?=latest
+TAG?=1.0.0
 NAME:=podinfo
-DOCKER_REPOSITORY:=stefanprodan
+DOCKER_REPOSITORY:=mmontes11
 DOCKER_IMAGE_NAME:=$(DOCKER_REPOSITORY)/$(NAME)
 GIT_COMMIT:=$(shell git describe --dirty --always)
 VERSION:=$(shell grep 'VERSION' pkg/version/version.go | awk '{ print $$4 }' | tr -d '"')
 EXTRA_RUN_ARGS?=--cache-server=redis://:redis@localhost:6379
+PLATFORM?=linux/amd64,linux/arm64,linux/arm
 
 run:
 	go run -ldflags "-s -w -X github.com/stefanprodan/podinfo/pkg/version.REVISION=$(GIT_COMMIT)" cmd/podinfo/* \
@@ -39,9 +40,9 @@ build-container:
 
 build-xx:
 	docker buildx build \
-	--platform=linux/amd64 \
+	--platform=$(PLATFORM) \
 	-t $(DOCKER_IMAGE_NAME):$(VERSION) \
-	--load \
+	--push \
 	-f Dockerfile.xx .
 
 build-base:
